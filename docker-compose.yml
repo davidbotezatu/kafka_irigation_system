@@ -117,3 +117,11 @@ services:
       echo -e 'Successfully created the following topics:'
       kafka-topics --bootstrap-server kafka1:9092 --list
       "
+
+  kafka-producer:
+    build:
+      context: .
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
