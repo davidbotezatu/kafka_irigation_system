@@ -1,4 +1,4 @@
-package producers;
+package config;
 
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -17,7 +17,6 @@ public class ProducerConfigFactory {
         props.put(ProducerConfig.ACKS_CONFIG, "all");
 
         this.producer = new KafkaProducer<>(props);
-        System.out.println("producer created");
     }
 
     public void sendSensorData(String topic, String key, String value) {

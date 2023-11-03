@@ -1,11 +1,14 @@
 package producers;
 
+import config.ProducerConfigFactory;
+
 import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ReservoirProducer {
     private static final String TOPIC = "water-levels";
+
     private static final String DATA_DIRECTORY = System.getProperty("user.dir") + File.separator + "test_data";
 
     public static void startReservoirProducer(ProducerConfigFactory producer) {

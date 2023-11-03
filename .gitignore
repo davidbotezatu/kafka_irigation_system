@@ -27,7 +27,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-/test_data/
+/producer/test_data/
 /.idea/
 /dependency-reduced-pom.xml
 /target/

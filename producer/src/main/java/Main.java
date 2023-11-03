@@ -1,8 +1,9 @@
-import producers.ProducerConfigFactory;
+import config.ProducerConfigFactory;
+import config.TestDataCreation;
 import producers.ReservoirProducer;
 
 public class Main {
-    private static final String BOOTSTRAP_SERVERS = "kafka1:9092,kafka2:9092,kafka3:9092";
+    private static final String BOOTSTRAP_SERVERS = "localhost:19092,localhost:29092,localhost:39092";
     public static void main(String[] args) {
         //create test data
         TestDataCreation.createData(100);

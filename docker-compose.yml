@@ -39,11 +39,15 @@ services:
     hostname: kafka1
     container_name: kafka1
     ports:
-      - "19092:9092"
+      - "19092:19092"
     environment:
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
-      KAFKA_ZOOKEEPER_CONNECT: "zk1:2181,zk2:2181,zk3:2181"
       KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: KAFKA_INTERNAL://kafka1:9092,KAFKA_HOST://kafka1:19092
+      KAFKA_ADVERTISED_LISTENERS: KAFKA_INTERNAL://kafka1:9092,KAFKA_HOST://localhost:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: KAFKA_INTERNAL:PLAINTEXT,KAFKA_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: KAFKA_INTERNAL
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_ZOOKEEPER_CONNECT: "zk1:2181,zk2:2181,zk3:2181"
       KAFKA_MIN_INSYNC_REPLICAS: 2
       KAFKA_DEFAULT_REPLICATION_FACTOR: 3
     depends_on:
@@ -56,11 +60,15 @@ services:
     hostname: kafka2
     container_name: kafka2
     ports:
-      - "29092:9092"
+      - "29092:29092"
     environment:
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
-      KAFKA_ZOOKEEPER_CONNECT: "zk1:2181,zk2:2181,zk3:2181"
       KAFKA_BROKER_ID: 2
+      KAFKA_LISTENERS: KAFKA_INTERNAL://kafka2:9092,KAFKA_HOST://kafka2:29092
+      KAFKA_ADVERTISED_LISTENERS: KAFKA_INTERNAL://kafka2:9092,KAFKA_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: KAFKA_INTERNAL:PLAINTEXT,KAFKA_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: KAFKA_INTERNAL
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_ZOOKEEPER_CONNECT: "zk1:2181,zk2:2181,zk3:2181"
       KAFKA_MIN_INSYNC_REPLICAS: 2
       KAFKA_DEFAULT_REPLICATION_FACTOR: 3
     depends_on:
@@ -73,11 +81,15 @@ services:
     hostname: kafka3
     container_name: kafka3
     ports:
-      - "39092:9092"
+      - "39092:39092"
     environment:
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9092
-      KAFKA_ZOOKEEPER_CONNECT: "zk1:2181,zk2:2181,zk3:2181"
       KAFKA_BROKER_ID: 3
+      KAFKA_LISTENERS: KAFKA_INTERNAL://kafka3:9092,KAFKA_HOST://kafka3:39092
+      KAFKA_ADVERTISED_LISTENERS: KAFKA_INTERNAL://kafka3:9092,KAFKA_HOST://localhost:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: KAFKA_INTERNAL:PLAINTEXT,KAFKA_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: KAFKA_INTERNAL
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_ZOOKEEPER_CONNECT: "zk1:2181,zk2:2181,zk3:2181"
       KAFKA_MIN_INSYNC_REPLICAS: 2
       KAFKA_DEFAULT_REPLICATION_FACTOR: 3
     depends_on:
@@ -86,17 +98,21 @@ services:
       - zk3
 
   akhq:
-    image: tchiotludo/akhq
+    image: tchiotludo/akhq:0.24.0
+    container_name: akhq
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            irrigation_cluster:
+              properties:
+                bootstrap.servers: "kafka1:9092,kafka2:9092,kafka3:9092"
+    ports:
+      - "8180:8080"
     links:
       - kafka1
       - kafka2
       - kafka3
-    environment:
-      MICRONAUT_CONFIG_FILES: '/app/akhq-config/application.yml'
-    ports:
-      - "8180:8080"
-    volumes:
-      - ./akhq-config:/app/akhq-config
 
   init-kafka:
     image: confluentinc/cp-kafka:7.0.1
@@ -120,7 +136,7 @@ services:
 
   kafka-producer:
     build:
-      context: .
+      context: ./producer
     depends_on:
       - kafka1
       - kafka2
