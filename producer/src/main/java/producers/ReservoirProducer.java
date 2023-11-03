@@ -24,7 +24,7 @@ public class ReservoirProducer {
                 if (matcher.matches()) {
                     String reservoirNumber = matcher.group(1);
                     String sensorPosition = matcher.group(2);
-                    String key = "Reservoir" + reservoirNumber + "_" + sensorPosition;
+                    String key = "reservoir_" + reservoirNumber + "_" + sensorPosition;
 
                     try {
                         BufferedReader reader = new BufferedReader(new FileReader(filePath));
