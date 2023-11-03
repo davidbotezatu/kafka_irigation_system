@@ -26,15 +26,17 @@ public class ReservoirProducer {
                     String sensorPosition = matcher.group(2);
                     String key = "reservoir_" + reservoirNumber + "_" + sensorPosition;
 
-                    try {
-                        BufferedReader reader = new BufferedReader(new FileReader(filePath));
-                        while (reader.readLine() != null) {
-                            String value = reader.readLine();
+                    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                        String value;
+                        while ((value = reader.readLine()) != null) {
                             producer.sendSensorData(TOPIC, key, value);
+                            // Assuming you want to simulate real-time data sending, otherwise remove the sleep
+                            //Thread.sleep(1000);
                         }
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                 }
             }
         }
