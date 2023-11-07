@@ -1,5 +1,5 @@
 import config.ProducerConfigFactory;
-import config.TestDataCreation;
+import utils.TestDataCreation;
 import producers.ReservoirProducer;
 
 public class Main {
@@ -9,7 +9,7 @@ public class Main {
         TestDataCreation.createData(100);
 
         ProducerConfigFactory producer = new ProducerConfigFactory(BOOTSTRAP_SERVERS);
-        ReservoirProducer.startReservoirProducer(producer);
+        ReservoirProducer.startReservoirProducer(producer, 1000);
         producer.closeProducer();
     }
 }
