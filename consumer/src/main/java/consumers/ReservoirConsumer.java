@@ -2,54 +2,50 @@ package consumers;
 
 import config.ConsumerConfigFactory;
 import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ReservoirConsumer implements Runnable {
-    private static final String TOPIC = "water-levels";
-    private final Consumer<String, String> consumer;
-    private final int reservoirNumber;
-    private final Pattern keyPattern;
+    private final String topic;
+    private final String bootstrapServers;
+    private final String groupId;
+    private final int reservoirNr;
 
-    public ReservoirConsumer(int reservoirNumber, String bootstrapServers, String groupId) {
-        this.reservoirNumber = reservoirNumber;
-        ConsumerConfigFactory factory = new ConsumerConfigFactory(bootstrapServers, groupId);
-        this.consumer = factory.getConsumer();
-        this.consumer.subscribe(Collections.singletonList(TOPIC));
-        this.keyPattern = Pattern.compile("reservoir_" + reservoirNumber + "_(top|bottom)");
+    public ReservoirConsumer(String topic, String bootstrapServers, String groupId, int reservoirNr) {
+        this.topic = topic;
+        this.bootstrapServers = bootstrapServers;
+        this.groupId = groupId;
+        this.reservoirNr = reservoirNr;
     }
 
     @Override
     public void run() {
-        try {
-            while (!Thread.currentThread().isInterrupted()) {
+        try (Consumer<String, String> consumer = new KafkaConsumer<>(ConsumerConfigFactory.createConsumerConfig(bootstrapServers, groupId))) {
+            consumer.subscribe(Collections.singletonList(topic));
+
+            while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
-                for (ConsumerRecord<String, String> record : records) {
-                    processRecord(record);
-                }
-            }
-        } finally {
-            consumer.close();
-        }
-    }
-
-    private void processRecord(ConsumerRecord<String, String> record) {
-        Matcher matcher = keyPattern.matcher(record.key());
-        if (matcher.matches()) {
-            String sensorPosition = matcher.group(1);
-            String sensorValue = record.value();
-
-            if ("bottom".equals(sensorPosition) && "false".equals(sensorValue)) {
-                System.out.println("Pumps started for Reservoir " + reservoirNumber);
-            } else if ("top".equals(sensorPosition) && "true".equals(sensorValue)) {
-                System.out.println("Pumps stopped for Reservoir " + reservoirNumber);
+                records.forEach(record -> {
+                    if (record.key().startsWith("reservoir_" + reservoirNr)) {
+                        processRecord(record.key(), record.value());
+                    }
+                });
             }
         }
     }
 
+    private void processRecord(String key, String value) {
+        String sensorPosition = key.substring(key.lastIndexOf("_") + 1);
+        String[] parts = value.split(" ");
+        boolean isWaterDetected = Boolean.parseBoolean(parts[1]);
+
+        if (sensorPosition.equals("bottom") && !isWaterDetected) {
+            System.out.println("Pumps started for reservoir " + reservoirNr);
+        } else if (sensorPosition.equals("top") && isWaterDetected) {
+            System.out.println("Pumps stopped for reservoir " + reservoirNr);
+        }
+    }
 }
