@@ -38,11 +38,11 @@ public class ParcelsTestDataCreation {
         StringBuilder data = new StringBuilder();
 
         for (int i = 0; i < nrOfDataPoints; i++) {
+            //max temp detected by a dht22 is 80 degrees
             data.append(String.format("%s%d%n", "T", random.nextInt(81)));
             data.append(String.format("%s%d%n", "H", random.nextInt(101)));
         }
 
-        //max temp detected by a dht22 is 80 degrees
         writeDataToFile(parcelNr, String.valueOf(data));
         writeDataToFile(parcelNr, String.valueOf(data));
     }

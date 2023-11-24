@@ -97,6 +97,22 @@ services:
       - zk2
       - zk3
 
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.0.1
+    hostname: schema-registry
+    container_name: schema-registry
+    ports:
+      - "8082:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_LOG_LEVEL: info
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka1:9092,kafka2:9092,kafka3:9092"
+    depends_on:
+      - zk1
+      - zk2
+      - zk3
+
   akhq:
     image: tchiotludo/akhq:0.24.0
     container_name: akhq
@@ -107,12 +123,15 @@ services:
             irrigation_cluster:
               properties:
                 bootstrap.servers: "kafka1:9092,kafka2:9092,kafka3:9092"
+              schema-registry:
+                url: "http://schema-registry:8081"
     ports:
       - "8180:8080"
     links:
       - kafka1
       - kafka2
       - kafka3
+      - schema-registry
 
   init-kafka:
     image: confluentinc/cp-kafka:7.0.1
@@ -133,11 +152,3 @@ services:
       echo -e 'Successfully created the following topics:'
       kafka-topics --bootstrap-server kafka1:9092 --list
       "
-
-  kafka-producer:
-    build:
-      context: ./producer
-    depends_on:
-      - kafka1
-      - kafka2
-      - kafka3

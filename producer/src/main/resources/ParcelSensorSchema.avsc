@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "SensorVal",
+  "fields": [
+    {
+      "name": "T",
+      "type": "int"
+    },
+    {
+      "name": "H",
+      "type": "int"
+    }
+  ]
+}
