@@ -3,6 +3,7 @@ package producers;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import utils.ReservoirStateService;
 
 import java.io.BufferedReader;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ public class ReservoirProducer implements Runnable {
     private final Path bottomSensorFilePath;
     private final Properties producerProps;
     private final long sleepDuration;
+    private ReservoirStateService reservoirStateService;
 
     public ReservoirProducer(String topic, Path topSensorFilePath, Path bottomSensorFilePath, Properties producerProps, long sleepDuration) {
         this.topic = topic;
@@ -47,6 +49,24 @@ public class ReservoirProducer implements Runnable {
     private void sendSensorData(Producer<String, String> producer, String key, String value) throws InterruptedException {
         ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, value);
         producer.send(record);
+        updateReservoirStateService(key, value);
         Thread.sleep(sleepDuration);
+    }
+
+    private void updateReservoirStateService(String key, String value) {
+        String reservoirId = removeLocation(key);
+
+        String[] parts = value.split(" ");
+        boolean isWaterDetected = Boolean.parseBoolean(parts[1]);
+
+        reservoirStateService.updateReservoirState(reservoirId, isWaterDetected);
+    }
+
+    private String removeLocation(String key) {
+        if (key.endsWith("_top")) {
+            return key.substring(0, key.length() - 4);
+        }
+
+        return key.substring(0, key.length() - 7);
     }
 }
