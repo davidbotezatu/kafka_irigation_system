@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-public class Parcel_Main {
+public class MainParcelProducer {
     private static final String BOOTSTRAP_SERVERS = "localhost:19092,localhost:29092,localhost:39092";
     private static final String PARCEL_TOPIC = "parcel-data";
     private static final long SLEEP_DURATION = 1000; // Sleep duration between messages - for testing purposes

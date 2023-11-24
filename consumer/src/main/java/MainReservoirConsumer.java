@@ -1,6 +1,6 @@
 import consumers.ReservoirConsumer;
 
-public class Main {
+public class MainReservoirConsumer {
     public static void main(String[] args) {
         final String BOOTSTRAP_SERVERS = "localhost:19092,localhost:29092,localhost:39092";
         final String TOPIC = "water-levels";

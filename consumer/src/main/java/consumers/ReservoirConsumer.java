@@ -23,7 +23,7 @@ public class ReservoirConsumer implements Runnable {
 
     @Override
     public void run() {
-        try (Consumer<String, String> consumer = new KafkaConsumer<>(ConsumerConfigFactory.createConsumerConfig(bootstrapServers, groupId))) {
+        try (Consumer<String, String> consumer = new KafkaConsumer<>(ConsumerConfigFactory.createConsumerConfig(bootstrapServers, groupId, 1))) {
             consumer.subscribe(Collections.singletonList(topic));
 
             while (true) {
